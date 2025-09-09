@@ -29,8 +29,8 @@ function registrarAsistencia(qr) {
   .then(data => {
     const partes = qr.split("|");
     const mensaje = data.status === "ok" 
-      ? `✅ ${partes[0]} registrado (${partes[1]})`
-      : `⚠️ ${partes[0]} ya registrado hoy (${partes[1]})`;
+      ? ` ${partes[0]} registrado (${partes[1]})`
+      : ` ${partes[0]} ya registrado hoy (${partes[1]})`;
     document.getElementById("status").innerText = mensaje;
     // Agregar historial en pantalla
     const log = document.getElementById("log");
@@ -39,7 +39,7 @@ function registrarAsistencia(qr) {
     log.prepend(entry);
   })
   .catch(err => {
-    document.getElementById("status").innerText = `❌ Error: ${err}`;
+    document.getElementById("status").innerText = ` Error: ${err}`;
   });
 }
 
@@ -57,4 +57,3 @@ html5QrcodeScanner.start(
 </script>
 </body>
 </html>
-

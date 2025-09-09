@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Registro Asistencia QR</title>
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+<style>
+  #reader { width: 100%; max-width: 500px; margin: auto; }
+  #status { text-align: center; font-size: 1.2em; margin-top: 10px; }
+  #log { text-align: center; margin-top: 10px; max-height:150px; overflow-y:auto; }
+</style>
+</head>
+<body>
+<h2 style="text-align:center;">Registro de Asistencia</h2>
+<div id="reader"></div>
+<div id="status">Esperando QR...</div>
+<div id="log"></div>
+
+<script>
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbwoogRC4PHApA6R5zWR234p54iTAfjS44LimXRNuqoLznb-7QQHgsPjHXzyZ3gMXMsU/exec"; // Pega aquí la URL de tu Web App
+
+function registrarAsistencia(qr) {
+  fetch(SHEET_URL, {
+    method: 'POST',
+    body: JSON.stringify({qr: qr}),
+    headers: { 'Content-Type': 'application/json' }
+  })
+  .then(res => res.json())
+  .then(data => {
+    const partes = qr.split("|");
+    const mensaje = data.status === "ok" 
+      ? `✅ ${partes[0]} registrado (${partes[1]})`
+      : `⚠️ ${partes[0]} ya registrado hoy (${partes[1]})`;
+    document.getElementById("status").innerText = mensaje;
+    // Agregar historial en pantalla
+    const log = document.getElementById("log");
+    const entry = document.createElement("div");
+    entry.innerText = mensaje + " - " + new Date().toLocaleTimeString();
+    log.prepend(entry);
+  })
+  .catch(err => {
+    document.getElementById("status").innerText = `❌ Error: ${err}`;
+  });
+}
+
+// Escaneo automático
+function onScanSuccess(decodedText, decodedResult) {
+  registrarAsistencia(decodedText);
+}
+
+const html5QrcodeScanner = new Html5Qrcode("reader");
+html5QrcodeScanner.start(
+  { facingMode: "environment" },
+  { fps: 10, qrbox: 250 },
+  onScanSuccess
+);
+</script>
+</body>
+</html>
